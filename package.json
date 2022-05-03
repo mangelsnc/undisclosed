@@ -1,0 +1,14 @@
+{
+  "name": "secrets",
+  "version": "1.0.0",
+  "description": "Command line tool to handle encrypted secrets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Miguel Ángel Sánchez Chordi",
+  "license": "GPL-3.0-or-later",
+  "bin": {
+      "secrets": "./index.js"
+  }
+}

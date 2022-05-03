@@ -1,0 +1,12 @@
+*.pem
+*.crt
+*.csr
+*.rsa
+.env.enc
+
+node_modules
+
+.idea
+*~
+*.swp
+*.swo
