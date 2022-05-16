@@ -2,7 +2,7 @@
   "name": "secrets",
   "version": "1.0.0",
   "description": "Command line tool to handle encrypted secrets",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc --build",
@@ -17,7 +17,7 @@
   "author": "Miguel Ángel Sánchez Chordi",
   "license": "GPL-3.0-or-later",
   "bin": {
-    "secrets": "dist/src/index.js"
+    "secrets": "dist/index.js"
   },
   "devDependencies": {
     "@types/jest": "^27.5.1",
