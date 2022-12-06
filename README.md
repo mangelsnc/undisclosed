@@ -5,7 +5,7 @@ Simple CLI tool to handle encrypted secrets, heavily inspired in [Symfony Secret
 With `undisclosed` you can set and store your credentials encrypted, and dump it in plain whenever you want.
 
 ## init
-Execute `secrets init` to create a default config file template and the folder to store the keys.
+Execute `undisclosed init` to create a default config file template and the folder to store the keys.
 
 ## generate-keypair
 With `undisclosed generate-keypair` you will generate your keypair. It will be used to encrypt all your data.

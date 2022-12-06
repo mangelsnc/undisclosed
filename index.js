@@ -102,7 +102,7 @@ function loadSecrets(truncateValue = false) {
 
 function handleInit() {
     if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-        fs.copyFileSync('config/default.json', process.env.PWD + '/undisclosed.conf.json');
+        fs.copyFileSync(__dirname + '/config/default.json', process.env.PWD + '/undisclosed.conf.json');
     }
     
     const config = loadConfig();
