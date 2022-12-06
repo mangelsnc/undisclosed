@@ -2,7 +2,10 @@
 *.crt
 *.csr
 *.rsa
+.env
 .env.enc
+undisclosed.conf.json
+secrets
 
 node_modules
 
