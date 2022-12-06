@@ -26,14 +26,14 @@ if (commandHandler.hasOwnProperty(subcommand)) {
 process.exit(0);
 
 function encrypt(toEncrypt, publicKey) {
-    const buffer = Buffer.from(toEncrypt,'utf8');
+    const buffer = Buffer.from(toEncrypt, 'utf8');
     const encrypted = crypto.publicEncrypt(publicKey, buffer);
 
     return encrypted.toString('base64');
 }
 
 function decrypt(toDecrypt, privateKey) {
-    const buffer = Buffer.from(toDecrypt,'base64');
+    const buffer = Buffer.from(toDecrypt, 'base64');
     const decrypted = crypto.privateDecrypt(privateKey, buffer);
 
     return decrypted.toString('utf8');
