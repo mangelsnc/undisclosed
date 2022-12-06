@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const crypto = require('crypto');
+import fs from 'fs';
+import crypto from 'crypto';
 
 const args = process.argv;
 const config = loadConfig();
@@ -9,12 +9,12 @@ const config = loadConfig();
 const subcommand = args[2];
 
 const commandHandler = {
-    'init': handleInit,
+    init: handleInit,
     'generate-keypair': handleGenereateKeyPair,
-    'list': handleList,
-    'set': handleSet,
-    'get': handleGet,
-    'dump': handleDump
+    list: handleList,
+    set: handleSet,
+    get: handleGet,
+    dump: handleDump
 }
 
 if (commandHandler.hasOwnProperty(subcommand)) {
@@ -82,11 +82,10 @@ function truncate(string, limit = 20) {
 }
 
 function loadSecrets(truncateValue = false) {
-    let data = fs.readFileSync(config.encryptedDataPath);
-    data = data.toString().split("\n");
-    const dataArray = [];
+    let data:string = fs.readFileSync(config.encryptedDataPath).toString();
+    const dataArray:Array<any> = [];
 
-    data.forEach(line => {
+    data.split("\n").forEach(line => {
         if (!line) {
             return
         }
@@ -104,7 +103,7 @@ function handleInit() {
     if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
         fs.copyFileSync(__dirname + '/config/default.json', process.env.PWD + '/undisclosed.conf.json');
     }
-    
+
     const config = loadConfig();
 
     if (!fs.existsSync(config.keypair.path)) {
@@ -204,21 +203,23 @@ function loadConfig() {
         keypair: {
             path: process.env.PWD + '/secrets',
             privateKeyName: 'private',
-            publicKeyName: 'public'
+            privateKeyPath: null,
+            publicKeyName: 'public',
+            publicKeyPath: null
         },
         defaultEnvironment: 'dev',
         encryptedDataPath: process.env.PWD + '/.env.enc',
         decryptedDataPath: process.env.PWD + '/.env',
     };
-    
+
     if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
         defaultConfig.keypair.privateKeyPath = defaultConfig.keypair.path + '/' + defaultConfig.keypair.privateKeyName + '.pem';
         defaultConfig.keypair.publicKeyPath = defaultConfig.keypair.path + '/' + defaultConfig.keypair.publicKeyName + '.pem';
-        
+
         return defaultConfig;
     }
 
-    const userConfig = JSON.parse(fs.readFileSync(process.env.PWD + '/undisclosed.conf.json'));
+    const userConfig:any = JSON.parse(fs.readFileSync(process.env.PWD + '/undisclosed.conf.json').toString());
     const keyPairPath = process.env.PWD + userConfig.keypair.path;
     userConfig.keypair.path = keyPairPath;
     const config = { ...defaultConfig, ...userConfig }
