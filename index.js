@@ -22,7 +22,7 @@ const commandHandler = {
 if (commandHandler.hasOwnProperty(subcommand)) {
     commandHandler[subcommand]();
 } else {
-    console.log("Usage: secrets [generate-keypair|list|set|get|dump]\n")
+    console.log("Usage: undisclosed [generate-keypair|list|set|get|dump]\n")
 }
 
 process.exit(0);
@@ -53,7 +53,7 @@ function generateKeyPair(privateKeyPath, publicKeyPath) {
     const keyPair = crypto.generateKeyPairSync('rsa', {
         modulusLength: 4096
     });
-    
+
     const publicKey = keyPair.publicKey.export({
         type: 'pkcs1',
         format: 'pem'
@@ -109,7 +109,7 @@ function handleGenereateKeyPair() {
 
         process.exit(1);
     }
-    
+
     generateKeyPair(privateKeyPath, publicKeyPath);
 }
 

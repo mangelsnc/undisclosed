@@ -1,5 +1,5 @@
 {
-  "name": "secrets",
+  "name": "undisclosed",
   "version": "1.0.0",
   "description": "Command line tool to handle encrypted secrets",
   "main": "index.js",
@@ -9,6 +9,6 @@
   "author": "Miguel Ángel Sánchez Chordi",
   "license": "GPL-3.0-or-later",
   "bin": {
-      "secrets": "./index.js"
+      "undisclosed": "./index.js"
   }
 }
