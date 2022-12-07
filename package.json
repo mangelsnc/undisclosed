@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "tsc --build",
+    "build": "tsc --build && chmod +x dist/index.js",
     "run:dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "format": "prettier --write \"{src,cli}/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test,cli}/**/*.ts\" --fix",
