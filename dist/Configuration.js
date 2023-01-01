@@ -20,7 +20,7 @@ class Configuration {
             return;
         }
         const userConfig = JSON.parse(fs_1.default.readFileSync(path).toString());
-        const keyPairPath = process.env.PWD + userConfig.keypair.path;
+        const keyPairPath = process.env.PWD + '/' + userConfig.keypair.path;
         this.keypair.path = keyPairPath;
         this.keypair.privateKeyPath = this.keypair.path + '/' + userConfig.keypair.privateKeyName + '.pem';
         this.keypair.publicKeyPath = this.keypair.path + '/' + userConfig.keypair.publicKeyName + '.pem';

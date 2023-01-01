@@ -25,12 +25,11 @@ export class Configuration {
   loadConfigurationFromFile(path: string = process.env.PWD + '/undisclosed.conf.json') {
 
     if (!fs.existsSync(path)) {
-      console.log('Nothing to load at ' + path);
       return;
     }
 
     const userConfig:any = JSON.parse(fs.readFileSync(path).toString());
-    const keyPairPath = process.env.PWD + userConfig.keypair.path;
+    const keyPairPath = process.env.PWD + '/' + userConfig.keypair.path;
     this.keypair.path = keyPairPath;
     this.keypair.privateKeyPath = this.keypair.path + '/' + userConfig.keypair.privateKeyName + '.pem';
     this.keypair.publicKeyPath = this.keypair.path + '/' + userConfig.keypair.publicKeyName + '.pem';
