@@ -9,11 +9,10 @@ const crypto_1 = __importDefault(require("crypto"));
 const Configuration_1 = require("./Configuration");
 const args = process.argv;
 const config = loadConfig();
-console.log(config);
 const subcommand = args[2];
 const commandHandler = {
     init: handleInit,
-    'generate-keypair': handleGenereateKeyPair,
+    'generate-keypair': handleGenerateKeyPair,
     list: handleList,
     set: handleSet,
     get: handleGet,
@@ -85,7 +84,8 @@ function loadSecrets(truncateValue = false) {
 }
 function handleInit() {
     if (!fs_1.default.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-        fs_1.default.copyFileSync(__dirname + '/config/default.json', process.env.PWD + '/undisclosed.conf.json');
+        const defaultConfig = new Configuration_1.Configuration(process.env.PWD + '/secrets');
+        fs_1.default.writeFileSync(process.env.PWD + '/undisclosed.conf.json', JSON.stringify(defaultConfig.toJSON(), null, 2));
     }
     const config = loadConfig();
     if (!fs_1.default.existsSync(config.keypair.path)) {
@@ -93,7 +93,7 @@ function handleInit() {
     }
     console.log("Undisclosed initialized.\n");
 }
-function handleGenereateKeyPair() {
+function handleGenerateKeyPair() {
     if (keysExists()) {
         console.error("Keypair already exists. Remove it before generate new keypair.\n");
         process.exit(1);

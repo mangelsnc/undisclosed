@@ -102,7 +102,8 @@ function loadSecrets(truncateValue = false) {
 
 function handleInit() {
     if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-        fs.copyFileSync(__dirname + '/config/default.json', process.env.PWD + '/undisclosed.conf.json');
+      const defaultConfig = new Configuration(process.env.PWD + '/secrets');
+      fs.writeFileSync(process.env.PWD + '/undisclosed.conf.json', JSON.stringify(defaultConfig.toJSON(), null, 2));
     }
 
     const config = loadConfig();

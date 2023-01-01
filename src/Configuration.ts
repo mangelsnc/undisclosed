@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import { KeyPairConfiguration } from './KeyPairConfiguration';
 
 export class Configuration {
@@ -38,15 +39,13 @@ export class Configuration {
   toJSON() {
     return {
       keypair: {
-          path: this.keypair.path,
+          path: path.basename(this.keypair.path),
           privateKeyName: this.keypair.privateKeyName,
-          privateKeyPath: this.keypair.privateKeyPath,
           publicKeyName: this.keypair.publicKeyName,
-          publicKeyPath: this.keypair.publicKeyPath
       },
       defaultEnvironment: this.defaultEnvironment,
-      encryptedDataPath: this.encryptedDataPath,
-      decryptedDataPath: this.decryptedDataPath,
+      encryptedDataPath: path.basename(this.encryptedDataPath),
+      decryptedDataPath: path.basename(this.decryptedDataPath),
     }
   }
 }

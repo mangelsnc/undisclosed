@@ -10,9 +10,7 @@ export declare class Configuration {
         keypair: {
             path: string;
             privateKeyName: string;
-            privateKeyPath: string;
             publicKeyName: string;
-            publicKeyPath: string;
         };
         defaultEnvironment: string;
         encryptedDataPath: string;

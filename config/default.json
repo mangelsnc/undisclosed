@@ -1,8 +1,0 @@
-{
-    "keypair": {
-        "path": "/secrets",
-        "privateKeyName": "private",
-        "publicKeyName": "public"
-    },
-    "defaultEnvironment": "dev"
-}

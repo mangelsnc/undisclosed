@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Configuration = void 0;
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const KeyPairConfiguration_1 = require("./KeyPairConfiguration");
 class Configuration {
     constructor(path, privateKeyName = 'private', publicKeyName = 'public', defaultEnvironment = 'dev', encryptedDataPath = process.env.PWD + '/.env.enc', decryptedDataPath = process.env.PWD + '/.env') {
@@ -27,15 +28,13 @@ class Configuration {
     toJSON() {
         return {
             keypair: {
-                path: this.keypair.path,
+                path: path_1.default.basename(this.keypair.path),
                 privateKeyName: this.keypair.privateKeyName,
-                privateKeyPath: this.keypair.privateKeyPath,
                 publicKeyName: this.keypair.publicKeyName,
-                publicKeyPath: this.keypair.publicKeyPath
             },
             defaultEnvironment: this.defaultEnvironment,
-            encryptedDataPath: this.encryptedDataPath,
-            decryptedDataPath: this.decryptedDataPath,
+            encryptedDataPath: path_1.default.basename(this.encryptedDataPath),
+            decryptedDataPath: path_1.default.basename(this.decryptedDataPath),
         };
     }
 }
