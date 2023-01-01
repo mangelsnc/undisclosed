@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
+import { Configuration } from './Configuration';
 
 const args = process.argv;
 const config = loadConfig();
@@ -10,7 +11,7 @@ const subcommand = args[2];
 
 const commandHandler = {
     init: handleInit,
-    'generate-keypair': handleGenereateKeyPair,
+    'generate-keypair': handleGenerateKeyPair,
     list: handleList,
     set: handleSet,
     get: handleGet,
@@ -113,7 +114,7 @@ function handleInit() {
     console.log("Undisclosed initialized.\n");
 }
 
-function handleGenereateKeyPair() {
+function handleGenerateKeyPair() {
     if (keysExists()) {
         console.error("Keypair already exists. Remove it before generate new keypair.\n");
 
@@ -199,32 +200,8 @@ function handleDump() {
 }
 
 function loadConfig() {
-    const defaultConfig = {
-        keypair: {
-            path: process.env.PWD + '/secrets',
-            privateKeyName: 'private',
-            privateKeyPath: null,
-            publicKeyName: 'public',
-            publicKeyPath: null
-        },
-        defaultEnvironment: 'dev',
-        encryptedDataPath: process.env.PWD + '/.env.enc',
-        decryptedDataPath: process.env.PWD + '/.env',
-    };
+  const configuration = new Configuration(process.env.PWD + '/secrets');
+  configuration.loadConfigurationFromFile(process.env.PWD + '/undisclosed.conf.json');
 
-    if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-        defaultConfig.keypair.privateKeyPath = defaultConfig.keypair.path + '/' + defaultConfig.keypair.privateKeyName + '.pem';
-        defaultConfig.keypair.publicKeyPath = defaultConfig.keypair.path + '/' + defaultConfig.keypair.publicKeyName + '.pem';
-
-        return defaultConfig;
-    }
-
-    const userConfig:any = JSON.parse(fs.readFileSync(process.env.PWD + '/undisclosed.conf.json').toString());
-    const keyPairPath = process.env.PWD + userConfig.keypair.path;
-    userConfig.keypair.path = keyPairPath;
-    const config = { ...defaultConfig, ...userConfig }
-    config.keypair.privateKeyPath = config.keypair.path + '/' + config.keypair.privateKeyName + '.pem';
-    config.keypair.publicKeyPath = config.keypair.path + '/' + config.keypair.publicKeyName + '.pem';
-
-    return config;
+  return configuration;
 }

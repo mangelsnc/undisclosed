@@ -6,8 +6,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
 const crypto_1 = __importDefault(require("crypto"));
+const Configuration_1 = require("./Configuration");
 const args = process.argv;
 const config = loadConfig();
+console.log(config);
 const subcommand = args[2];
 const commandHandler = {
     init: handleInit,
@@ -21,7 +23,7 @@ if (commandHandler.hasOwnProperty(subcommand)) {
     commandHandler[subcommand]();
 }
 else {
-    console.log("Usage: undisclosed boloncho[init|generate-keypair|list|set|get|dump]\n");
+    console.log("Usage: undisclosed [init|generate-keypair|list|set|get|dump]\n");
 }
 process.exit(0);
 function encrypt(toEncrypt, publicKey) {
@@ -159,29 +161,8 @@ function handleDump() {
     console.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
 }
 function loadConfig() {
-    const defaultConfig = {
-        keypair: {
-            path: process.env.PWD + '/secrets',
-            privateKeyName: 'private',
-            privateKeyPath: null,
-            publicKeyName: 'public',
-            publicKeyPath: null
-        },
-        defaultEnvironment: 'dev',
-        encryptedDataPath: process.env.PWD + '/.env.enc',
-        decryptedDataPath: process.env.PWD + '/.env',
-    };
-    if (!fs_1.default.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-        defaultConfig.keypair.privateKeyPath = defaultConfig.keypair.path + '/' + defaultConfig.keypair.privateKeyName + '.pem';
-        defaultConfig.keypair.publicKeyPath = defaultConfig.keypair.path + '/' + defaultConfig.keypair.publicKeyName + '.pem';
-        return defaultConfig;
-    }
-    const userConfig = JSON.parse(fs_1.default.readFileSync(process.env.PWD + '/undisclosed.conf.json').toString());
-    const keyPairPath = process.env.PWD + userConfig.keypair.path;
-    userConfig.keypair.path = keyPairPath;
-    const config = Object.assign(Object.assign({}, defaultConfig), userConfig);
-    config.keypair.privateKeyPath = config.keypair.path + '/' + config.keypair.privateKeyName + '.pem';
-    config.keypair.publicKeyPath = config.keypair.path + '/' + config.keypair.publicKeyName + '.pem';
-    return config;
+    const configuration = new Configuration_1.Configuration(process.env.PWD + '/secrets');
+    configuration.loadConfigurationFromFile(process.env.PWD + '/undisclosed.conf.json');
+    return configuration;
 }
 //# sourceMappingURL=index.js.map
