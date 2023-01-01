@@ -4,6 +4,7 @@ import fs from 'fs';
 
 import { Crypto } from './Crypto';
 import { Configuration } from './Configuration';
+import Output from './Output';
 
 const args = process.argv;
 const config = loadConfig();
@@ -23,21 +24,13 @@ const commandHandler = {
 if (commandHandler.hasOwnProperty(subcommand)) {
     commandHandler[subcommand]();
 } else {
-    console.log("Usage: undisclosed [init|generate-keypair|list|set|get|dump]\n")
+    Output.log("Usage: undisclosed [init|generate-keypair|list|set|get|dump]\n")
 }
 
 process.exit(0);
 
 function encryptedFileExists() {
     return fs.existsSync(config.encryptedDataPath);
-}
-
-function truncate(string, limit = 20) {
-    if (string.length <= limit) {
-        return string;
-    }
-
-    return string.slice(0, limit) + '...'
 }
 
 function loadSecrets(truncateValue = false) {
@@ -51,7 +44,7 @@ function loadSecrets(truncateValue = false) {
         const lineArray = line.split('=');
         dataArray.push({
             key: lineArray[0],
-            value: truncateValue ? truncate(lineArray[1]) : lineArray[1]
+            value: truncateValue ? Output.truncate(lineArray[1]) : lineArray[1]
         });
     });
 
@@ -70,12 +63,12 @@ function handleInit() {
         fs.mkdirSync(config.keypair.path);
     }
 
-    console.log("Undisclosed initialized.\n");
+    Output.log("Undisclosed initialized.\n");
 }
 
 function handleGenerateKeyPair() {
     if (crypto.keysExists()) {
-        console.error("Keypair already exists. Remove it before generate new keypair.\n");
+        Output.error("Keypair already exists. Remove it before generate new keypair.\n");
 
         process.exit(1);
     }
@@ -86,26 +79,26 @@ function handleGenerateKeyPair() {
     const privateKey = fs.readFileSync(config.keypair.privateKeyPath, 'utf8').toString();
 
     const dataToShow = [
-      { type: 'public', path: config.keypair.publicKeyPath, value: truncate(publicKey) },
-      { type: 'private', path: config.keypair.privateKeyPath, value: truncate(privateKey) }
+      { type: 'public', path: config.keypair.publicKeyPath, value: Output.truncate(publicKey) },
+      { type: 'private', path: config.keypair.privateKeyPath, value: Output.truncate(privateKey) }
     ];
 
-    console.table(dataToShow);
+    Output.table(dataToShow);
 }
 
 function handleList() {
     if (!encryptedFileExists()) {
-        console.error("Secrets file not found.\n");
+        Output.error("Secrets file not found.\n");
         process.exit(1);
     }
 
     const secrets = loadSecrets(true);
-    console.table(secrets);
+    Output.table(secrets);
 }
 
 function handleSet() {
     if (!crypto.keysExists()) {
-        console.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
+        Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
         process.exit(1);
     }
 
@@ -114,19 +107,19 @@ function handleSet() {
     const encryptedValue = crypto.encrypt(value);
     fs.appendFileSync(config.encryptedDataPath, key.toUpperCase() + '=' + encryptedValue + "\n");
 
-    console.table([
-        { key: key.toUpperCase(), value: truncate(encryptedValue) }
+    Output.table([
+        { key: key.toUpperCase(), value: Output.truncate(encryptedValue) }
     ]);
 }
 
 function handleGet() {
     if (!encryptedFileExists()) {
-        console.error("Secrets file not found.\n");
+        Output.error("Secrets file not found.\n");
         process.exit(1);
     }
 
     if (!crypto.keysExists()) {
-        console.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
+        Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
         process.exit(1);
     }
 
@@ -134,23 +127,23 @@ function handleGet() {
     loadSecrets().forEach(secret => {
         if (secret.key === keyToFind) {
             secret.value = crypto.decrypt(secret.value);
-            console.table([secret]);
+            Output.table([secret]);
 
             process.exit(0);
         }
     });
 
-    console.error("Secret not found.\n");
+    Output.error("Secret not found.\n");
 }
 
 function handleDump() {
     if (!encryptedFileExists()) {
-        console.error("Secrets file not found.\n");
+        Output.error("Secrets file not found.\n");
         process.exit(1);
     }
 
     if (!crypto.keysExists()) {
-        console.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
+        Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
         process.exit(1);
     }
 
@@ -162,7 +155,7 @@ function handleDump() {
 
     fs.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
 
-    console.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
+    Output.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
 }
 
 function loadConfig() {

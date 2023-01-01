@@ -40,12 +40,6 @@ class Crypto {
         fs_1.default.writeFileSync(this.configuration.keypair.publicKeyPath, publicKey);
         fs_1.default.writeFileSync(this.configuration.keypair.privateKeyPath, privateKey);
     }
-    truncate(string, limit = 20) {
-        if (string.length <= limit) {
-            return string;
-        }
-        return string.slice(0, limit) + '...';
-    }
     keysExists() {
         return fs_1.default.existsSync(this.configuration.keypair.privateKeyPath) || fs_1.default.existsSync(this.configuration.keypair.publicKeyPath);
     }

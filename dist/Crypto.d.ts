@@ -7,6 +7,5 @@ export declare class Crypto {
     encrypt(toEncrypt: any): string;
     decrypt(toDecrypt: any): string;
     generateKeyPair(): void;
-    truncate(string: any, limit?: number): any;
     keysExists(): boolean;
 }

@@ -16,7 +16,6 @@ class Configuration {
     }
     loadConfigurationFromFile(path = process.env.PWD + '/undisclosed.conf.json') {
         if (!fs_1.default.existsSync(path)) {
-            console.log('Nothing to load at ' + path);
             return;
         }
         const userConfig = JSON.parse(fs_1.default.readFileSync(path).toString());
