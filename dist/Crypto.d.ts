@@ -1,5 +1,5 @@
-import { Configuration } from './Configuration';
-export declare class Crypto {
+import Configuration from './Configuration';
+export default class Crypto {
     readonly configuration: Configuration;
     readonly publicKey: string;
     readonly privateKey: string;

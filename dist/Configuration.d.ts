@@ -1,5 +1,5 @@
-import { KeyPairConfiguration } from './KeyPairConfiguration';
-export declare class Configuration {
+import KeyPairConfiguration from './KeyPairConfiguration';
+export default class Configuration {
     keypair: KeyPairConfiguration;
     defaultEnvironment: string;
     encryptedDataPath: string;

@@ -1,4 +1,4 @@
-export declare class KeyPairConfiguration {
+export default class KeyPairConfiguration {
     path: string;
     privateKeyName: string;
     privateKeyPath: string;

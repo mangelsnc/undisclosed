@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KeyPairConfiguration = void 0;
 class KeyPairConfiguration {
     constructor(path, privateKeyName, publicKeyName) {
         this.path = path;
@@ -10,5 +9,5 @@ class KeyPairConfiguration {
         this.publicKeyPath = this.path + '/' + this.publicKeyName + '.pem';
     }
 }
-exports.KeyPairConfiguration = KeyPairConfiguration;
+exports.default = KeyPairConfiguration;
 //# sourceMappingURL=KeyPairConfiguration.js.map

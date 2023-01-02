@@ -15,12 +15,12 @@ export default class Output {
   }
 
   static printSecrets(secrets: Array<Secret>, truncate: boolean = true) {
-      if (truncate) {
-        secrets.forEach(secret => { secret.value = Output.truncate(secret.value) });
-      }
-
-      Output.table(secrets);
+    if (truncate) {
+      secrets.forEach(secret => { secret.value = Output.truncate(secret.value) });
     }
+
+    Output.table(secrets);
+  }
 
   static printKeyPair(keyPair: Array<Key>) {
     keyPair.forEach(key => { key.value = Output.truncate(key.value) });

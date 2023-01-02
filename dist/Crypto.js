@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Crypto = void 0;
 const fs_1 = __importDefault(require("fs"));
 const crypto_1 = __importDefault(require("crypto"));
 class Crypto {
@@ -44,5 +43,5 @@ class Crypto {
         return fs_1.default.existsSync(this.configuration.keypair.privateKeyPath) || fs_1.default.existsSync(this.configuration.keypair.publicKeyPath);
     }
 }
-exports.Crypto = Crypto;
+exports.default = Crypto;
 //# sourceMappingURL=Crypto.js.map

@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { KeyPairConfiguration } from './KeyPairConfiguration';
+import KeyPairConfiguration from './KeyPairConfiguration';
 
-export class Configuration {
+export default class Configuration {
   keypair: KeyPairConfiguration;
   defaultEnvironment: string;
   encryptedDataPath: string;

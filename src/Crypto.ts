@@ -2,9 +2,9 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { JwkKeyExportOptions } from 'crypto';
 
-import { Configuration } from './Configuration'
+import Configuration from './Configuration'
 
-export class Crypto {
+export default class Crypto {
   readonly configuration: Configuration;
   readonly publicKey: string;
   readonly privateKey: string;

@@ -5,14 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
-const Crypto_1 = require("./Crypto");
-const Configuration_1 = require("./Configuration");
+const Crypto_1 = __importDefault(require("./Crypto"));
+const Configuration_1 = __importDefault(require("./Configuration"));
 const Output_1 = __importDefault(require("./Output"));
 const Secret_1 = __importDefault(require("./Secret"));
 const Key_1 = __importDefault(require("./Key"));
 const args = process.argv;
 const config = loadConfig();
-const crypto = new Crypto_1.Crypto(config);
+const crypto = new Crypto_1.default(config);
 const subcommand = args[2];
 const commandHandler = {
     init: handleInit,
@@ -46,7 +46,7 @@ function loadSecrets() {
 }
 function handleInit() {
     if (!fs_1.default.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-        const defaultConfig = new Configuration_1.Configuration(process.env.PWD + '/secrets');
+        const defaultConfig = new Configuration_1.default(process.env.PWD + '/secrets');
         fs_1.default.writeFileSync(process.env.PWD + '/undisclosed.conf.json', JSON.stringify(defaultConfig.toJSON(), null, 2));
     }
     const config = loadConfig();
@@ -138,7 +138,7 @@ function handleDump() {
     }
 }
 function loadConfig() {
-    const configuration = new Configuration_1.Configuration(process.env.PWD + '/secrets');
+    const configuration = new Configuration_1.default(process.env.PWD + '/secrets');
     configuration.loadConfigurationFromFile(process.env.PWD + '/undisclosed.conf.json');
     return configuration;
 }
