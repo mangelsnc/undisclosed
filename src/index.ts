@@ -5,6 +5,8 @@ import fs from 'fs';
 import { Crypto } from './Crypto';
 import { Configuration } from './Configuration';
 import Output from './Output';
+import Secret from './Secret';
+import Key from './Key';
 
 const args = process.argv;
 const config = loadConfig();
@@ -29,26 +31,23 @@ if (commandHandler.hasOwnProperty(subcommand)) {
 
 process.exit(0);
 
-function encryptedFileExists() {
+function encryptedFileExists(): boolean {
     return fs.existsSync(config.encryptedDataPath);
 }
 
-function loadSecrets(truncateValue = false) {
+function loadSecrets(): Array<Secret> {
     let data:string = fs.readFileSync(config.encryptedDataPath).toString();
-    const dataArray:Array<any> = [];
+    const secrets:Array<Secret> = [];
 
     data.split("\n").forEach(line => {
         if (!line) {
             return
         }
         const lineArray = line.split('=');
-        dataArray.push({
-            key: lineArray[0],
-            value: truncateValue ? Output.truncate(lineArray[1]) : lineArray[1]
-        });
+        secrets.push(new Secret(lineArray[0], lineArray[1]));
     });
 
-    return dataArray;
+    return secrets;
 }
 
 function handleInit() {
@@ -78,12 +77,12 @@ function handleGenerateKeyPair() {
     const publicKey = fs.readFileSync(config.keypair.publicKeyPath, 'utf8').toString();
     const privateKey = fs.readFileSync(config.keypair.privateKeyPath, 'utf8').toString();
 
-    const dataToShow = [
-      { type: 'public', path: config.keypair.publicKeyPath, value: Output.truncate(publicKey) },
-      { type: 'private', path: config.keypair.privateKeyPath, value: Output.truncate(privateKey) }
+    const keyPair = [
+      Key.createPublicKey(config.keypair.publicKeyPath, publicKey),
+      Key.createPrivateKey(config.keypair.privateKeyPath, privateKey),
     ];
 
-    Output.table(dataToShow);
+    Output.printKeyPair(keyPair);
 }
 
 function handleList() {
@@ -92,8 +91,8 @@ function handleList() {
         process.exit(1);
     }
 
-    const secrets = loadSecrets(true);
-    Output.table(secrets);
+    const secrets = loadSecrets();
+    Output.printSecrets(secrets);
 }
 
 function handleSet() {
@@ -107,9 +106,7 @@ function handleSet() {
     const encryptedValue = crypto.encrypt(value);
     fs.appendFileSync(config.encryptedDataPath, key.toUpperCase() + '=' + encryptedValue + "\n");
 
-    Output.table([
-        { key: key.toUpperCase(), value: Output.truncate(encryptedValue) }
-    ]);
+    Output.printSecret(new Secret(key, encryptedValue));
 }
 
 function handleGet() {
@@ -126,8 +123,13 @@ function handleGet() {
     const keyToFind = args[3].toUpperCase();
     loadSecrets().forEach(secret => {
         if (secret.key === keyToFind) {
-            secret.value = crypto.decrypt(secret.value);
-            Output.table([secret]);
+            try {
+              secret.value = crypto.decrypt(secret.value);
+              Output.printSecret(secret);
+            } catch (e) {
+              Output.error('Something went wrong while decrypting ' + secret.key);
+              process.exit(1);
+            }
 
             process.exit(0);
         }
@@ -149,13 +151,18 @@ function handleDump() {
 
     const dumpedContent = []
     loadSecrets().forEach(secret => {
-        secret.value = crypto.decrypt(secret.value);
-        dumpedContent.push(secret.key + '=' + secret.value);
+        try {
+          secret.value = crypto.decrypt(secret.value);
+          dumpedContent.push(secret.key + '=' + secret.value);
+        } catch (e) {
+          Output.error('Something went wrong while decrypting ' + secret.key);
+        }
     });
 
-    fs.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
-
-    Output.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
+    if (dumpedContent.length > 0) {
+      fs.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
+      Output.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
+    }
 }
 
 function loadConfig() {

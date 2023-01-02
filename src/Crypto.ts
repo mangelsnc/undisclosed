@@ -27,6 +27,7 @@ export class Crypto {
 
   decrypt(toDecrypt): string {
     const buffer = Buffer.from(toDecrypt, 'base64');
+
     const decrypted = crypto.privateDecrypt(this.privateKey, buffer);
 
     return decrypted.toString('utf8');
