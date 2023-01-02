@@ -9,7 +9,7 @@
     "run:dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "format": "prettier --write \"{src,cli}/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test,cli}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
