@@ -28,7 +28,7 @@ if (commandHandler.hasOwnProperty(subcommand)) {
     commandHandler[subcommand]();
 }
 else {
-    Output_1.default.log("Usage: undisclosed [init|generate-keypair|list|set|get|dump]\n");
+    Output_1.default.log("Usage: undisclosed [init|generate-keypair|list|set|get|delete|dump]\n");
 }
 process.exit(0);
 function encryptedFileExists(file = '') {

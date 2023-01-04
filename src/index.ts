@@ -28,7 +28,7 @@ const commandHandler = {
 if (commandHandler.hasOwnProperty(subcommand)) {
   commandHandler[subcommand]();
 } else {
-  Output.log("Usage: undisclosed [init|generate-keypair|list|set|get|dump]\n")
+  Output.log("Usage: undisclosed [init|generate-keypair|list|set|get|delete|dump]\n")
 }
 
 process.exit(0);
