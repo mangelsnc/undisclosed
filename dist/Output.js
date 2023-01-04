@@ -25,6 +25,7 @@ class Output {
     }
     static error(message) {
         console.error(message);
+        process.exit(1);
     }
     static truncate(string, limit = 20) {
         if (string.length <= limit) {

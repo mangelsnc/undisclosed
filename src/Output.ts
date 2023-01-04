@@ -33,6 +33,7 @@ export default class Output {
 
   static error(message: string) {
     console.error(message);
+    process.exit(1);
   }
 
   static truncate(string: string, limit: number = 20) {
