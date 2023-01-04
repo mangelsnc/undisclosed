@@ -35,7 +35,7 @@ $ undisclosed list
 ```
 
 ## set
-With `undisclosed set KEY value` you can store a new secret.
+With `undisclosed set KEY value` you can store a new secret or update an existing one.
 
 ```
 $ undisclosed set USER root

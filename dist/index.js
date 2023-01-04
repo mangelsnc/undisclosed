@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const Crypto_1 = __importDefault(require("./Crypto"));
 const Configuration_1 = __importDefault(require("./Configuration"));
 const Output_1 = __importDefault(require("./Output"));
@@ -29,18 +30,17 @@ else {
     Output_1.default.log("Usage: undisclosed [init|generate-keypair|list|set|get|dump]\n");
 }
 process.exit(0);
-function encryptedFileExists() {
-    return fs_1.default.existsSync(config.encryptedDataPath);
+function encryptedFileExists(file = '') {
+    return fs_1.default.existsSync(config.encryptedDataPath + '/' + file + '.enc');
 }
 function loadSecrets() {
-    let data = fs_1.default.readFileSync(config.encryptedDataPath).toString();
+    const files = fs_1.default.readdirSync(config.encryptedDataPath);
+    const encryptedFiles = files.filter(file => path_1.default.extname(file) === '.enc');
     const secrets = [];
-    data.split("\n").forEach(line => {
-        if (!line) {
-            return;
-        }
-        const lineArray = line.split('=');
-        secrets.push(new Secret_1.default(lineArray[0], lineArray[1]));
+    encryptedFiles.forEach(file => {
+        const key = path_1.default.basename(file, '.enc');
+        const value = fs_1.default.readFileSync(config.encryptedDataPath + '/' + file).toString();
+        secrets.push(new Secret_1.default(key, value));
     });
     return secrets;
 }
@@ -70,11 +70,10 @@ function handleGenerateKeyPair() {
     Output_1.default.printKeyPair(keyPair);
 }
 function handleList() {
-    if (!encryptedFileExists()) {
-        Output_1.default.error("Secrets file not found.\n");
-        process.exit(1);
-    }
     const secrets = loadSecrets();
+    if (secrets.length == 0) {
+        Output_1.default.error('No secrets to list');
+    }
     Output_1.default.printSecrets(secrets);
 }
 function handleSet() {
@@ -85,39 +84,30 @@ function handleSet() {
     const key = args[3];
     const value = args[4];
     const encryptedValue = crypto.encrypt(value);
-    fs_1.default.appendFileSync(config.encryptedDataPath, key.toUpperCase() + '=' + encryptedValue + "\n");
+    fs_1.default.writeFileSync(config.encryptedDataPath + '/' + key.toUpperCase() + '.enc', encryptedValue);
     Output_1.default.printSecret(new Secret_1.default(key, encryptedValue));
 }
 function handleGet() {
-    if (!encryptedFileExists()) {
-        Output_1.default.error("Secrets file not found.\n");
+    const keyToFind = args[3].toUpperCase();
+    if (!encryptedFileExists(keyToFind)) {
+        Output_1.default.error("Secret not found.\n");
         process.exit(1);
     }
     if (!crypto.keysExists()) {
         Output_1.default.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
         process.exit(1);
     }
-    const keyToFind = args[3].toUpperCase();
-    loadSecrets().forEach(secret => {
-        if (secret.key === keyToFind) {
-            try {
-                secret.value = crypto.decrypt(secret.value);
-                Output_1.default.printSecret(secret);
-            }
-            catch (e) {
-                Output_1.default.error('Something went wrong while decrypting ' + secret.key);
-                process.exit(1);
-            }
-            process.exit(0);
-        }
-    });
-    Output_1.default.error("Secret not found.\n");
-}
-function handleDump() {
-    if (!encryptedFileExists()) {
-        Output_1.default.error("Secrets file not found.\n");
+    try {
+        const secret = new Secret_1.default(keyToFind, fs_1.default.readFileSync(config.encryptedDataPath + '/' + keyToFind + '.enc').toString());
+        secret.value = crypto.decrypt(secret.value);
+        Output_1.default.printSecret(secret);
+    }
+    catch (e) {
+        Output_1.default.error('Something went wrong while decrypting ' + keyToFind);
         process.exit(1);
     }
+}
+function handleDump() {
     if (!crypto.keysExists()) {
         Output_1.default.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
         process.exit(1);

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
+import path from 'path';
 
 import Crypto from './Crypto';
 import Configuration from './Configuration';
@@ -31,20 +32,19 @@ if (commandHandler.hasOwnProperty(subcommand)) {
 
 process.exit(0);
 
-function encryptedFileExists(): boolean {
-  return fs.existsSync(config.encryptedDataPath);
+function encryptedFileExists(file: string = ''): boolean {
+  return fs.existsSync(config.encryptedDataPath + '/' + file + '.enc');
 }
 
 function loadSecrets(): Array<Secret> {
-  let data:string = fs.readFileSync(config.encryptedDataPath).toString();
+  const files = fs.readdirSync(config.encryptedDataPath);
+  const encryptedFiles = files.filter(file => path.extname(file) === '.enc');
   const secrets:Array<Secret> = [];
 
-  data.split("\n").forEach(line => {
-    if (!line) {
-      return
-    }
-    const lineArray = line.split('=');
-    secrets.push(new Secret(lineArray[0], lineArray[1]));
+  encryptedFiles.forEach(file => {
+    const key = path.basename(file, '.enc');
+    const value = fs.readFileSync(config.encryptedDataPath + '/' + file).toString();
+    secrets.push(new Secret(key, value));
   });
 
   return secrets;
@@ -86,12 +86,12 @@ function handleGenerateKeyPair() {
 }
 
 function handleList() {
-  if (!encryptedFileExists()) {
-    Output.error("Secrets file not found.\n");
-    process.exit(1);
+  const secrets = loadSecrets();
+
+  if (secrets.length == 0) {
+    Output.error('No secrets to list');
   }
 
-  const secrets = loadSecrets();
   Output.printSecrets(secrets);
 }
 
@@ -104,14 +104,16 @@ function handleSet() {
   const key = args[3];
   const value = args[4];
   const encryptedValue = crypto.encrypt(value);
-  fs.appendFileSync(config.encryptedDataPath, key.toUpperCase() + '=' + encryptedValue + "\n");
+  fs.writeFileSync(config.encryptedDataPath + '/' + key.toUpperCase() + '.enc', encryptedValue);
 
   Output.printSecret(new Secret(key, encryptedValue));
 }
 
 function handleGet() {
-  if (!encryptedFileExists()) {
-    Output.error("Secrets file not found.\n");
+  const keyToFind = args[3].toUpperCase();
+
+  if (!encryptedFileExists(keyToFind)) {
+    Output.error("Secret not found.\n");
     process.exit(1);
   }
 
@@ -120,30 +122,17 @@ function handleGet() {
     process.exit(1);
   }
 
-  const keyToFind = args[3].toUpperCase();
-  loadSecrets().forEach(secret => {
-    if (secret.key === keyToFind) {
-      try {
-        secret.value = crypto.decrypt(secret.value);
-        Output.printSecret(secret);
-      } catch (e) {
-        Output.error('Something went wrong while decrypting ' + secret.key);
-        process.exit(1);
-      }
-
-      process.exit(0);
-    }
-  });
-
-  Output.error("Secret not found.\n");
+  try {
+    const secret = new Secret(keyToFind, fs.readFileSync(config.encryptedDataPath + '/' + keyToFind + '.enc').toString());
+    secret.value = crypto.decrypt(secret.value);
+    Output.printSecret(secret);
+  } catch (e) {
+    Output.error('Something went wrong while decrypting ' + keyToFind);
+    process.exit(1);
+  }
 }
 
 function handleDump() {
-  if (!encryptedFileExists()) {
-    Output.error("Secrets file not found.\n");
-    process.exit(1);
-  }
-
   if (!crypto.keysExists()) {
     Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
     process.exit(1);

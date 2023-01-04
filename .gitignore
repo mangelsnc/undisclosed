@@ -3,7 +3,6 @@
 *.csr
 *.rsa
 .env
-.env.enc
 undisclosed.conf.json
 secrets
 
