@@ -13,7 +13,7 @@ export default class Configuration {
     privateKeyName: string = 'private',
     publicKeyName: string = 'public',
     defaultEnvironment: string = 'dev',
-    encryptedDataPath: string = process.env.PWD + '/.env.enc',
+    encryptedDataPath: string = process.env.PWD + '/secrets',
     decryptedDataPath: string = process.env.PWD + '/.env'
   ) {
     this.keypair = new KeyPairConfiguration(path, privateKeyName, publicKeyName)

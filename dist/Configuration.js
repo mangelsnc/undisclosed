@@ -7,7 +7,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const KeyPairConfiguration_1 = __importDefault(require("./KeyPairConfiguration"));
 class Configuration {
-    constructor(path, privateKeyName = 'private', publicKeyName = 'public', defaultEnvironment = 'dev', encryptedDataPath = process.env.PWD + '/.env.enc', decryptedDataPath = process.env.PWD + '/.env') {
+    constructor(path, privateKeyName = 'private', publicKeyName = 'public', defaultEnvironment = 'dev', encryptedDataPath = process.env.PWD + '/secrets', decryptedDataPath = process.env.PWD + '/.env') {
         this.keypair = new KeyPairConfiguration_1.default(path, privateKeyName, publicKeyName);
         this.defaultEnvironment = defaultEnvironment;
         this.encryptedDataPath = encryptedDataPath;
