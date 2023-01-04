@@ -21,6 +21,7 @@ const commandHandler = {
   list: handleList,
   set: handleSet,
   get: handleGet,
+  delete: handleDelete,
   dump: handleDump
 }
 
@@ -68,7 +69,6 @@ function handleInit() {
 function handleGenerateKeyPair() {
   if (crypto.keysExists()) {
     Output.error("Keypair already exists. Remove it before generate new keypair.\n");
-
     process.exit(1);
   }
 
@@ -89,7 +89,8 @@ function handleList() {
   const secrets = loadSecrets();
 
   if (secrets.length == 0) {
-    Output.error('No secrets to list');
+    Output.error('No secrets to list.');
+    process.exit(1);
   }
 
   Output.printSecrets(secrets);
@@ -97,7 +98,7 @@ function handleList() {
 
 function handleSet() {
   if (!crypto.keysExists()) {
-    Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
+    Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
     process.exit(1);
   }
 
@@ -118,7 +119,7 @@ function handleGet() {
   }
 
   if (!crypto.keysExists()) {
-    Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
+    Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
     process.exit(1);
   }
 
@@ -132,9 +133,26 @@ function handleGet() {
   }
 }
 
+function handleDelete() {
+  const keyToFind = args[3].toUpperCase();
+
+  if (!encryptedFileExists(keyToFind)) {
+    Output.error("Secret not found.\n");
+    process.exit(1);
+  }
+
+  try {
+    fs.unlinkSync(config.encryptedDataPath + '/' + keyToFind + '.enc');
+    Output.log('Secret deleted.');
+  } catch (e) {
+    Output.error(e);
+    process.exit(1);
+  }
+}
+
 function handleDump() {
   if (!crypto.keysExists()) {
-    Output.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
+    Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
     process.exit(1);
   }
 
@@ -148,10 +166,13 @@ function handleDump() {
     }
   });
 
-  if (dumpedContent.length > 0) {
-    fs.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
-    Output.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
+  if (dumpedContent.length === 0) {
+    Output.error('Nothing to dump.');
+    process.exit(1);
   }
+
+  fs.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
+  Output.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
 }
 
 function loadConfig() {

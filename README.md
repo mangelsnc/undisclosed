@@ -58,5 +58,14 @@ $ undisclosed get USER
 └─────────┴────────┴────────┘
 ```
 
+## delete
+With `undisclosed delete KEY` you can delete a secret.
+
+```
+$ undisclosed delete USER
+
+Secret deleted.
+```
+
 ## dump
 With `undisclosed dump` you can dump all the stored secrets decrypted into a `.env` file.

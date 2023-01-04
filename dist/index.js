@@ -21,6 +21,7 @@ const commandHandler = {
     list: handleList,
     set: handleSet,
     get: handleGet,
+    delete: handleDelete,
     dump: handleDump
 };
 if (commandHandler.hasOwnProperty(subcommand)) {
@@ -73,6 +74,7 @@ function handleList() {
     const secrets = loadSecrets();
     if (secrets.length == 0) {
         Output_1.default.error('No secrets to list');
+        process.exit(1);
     }
     Output_1.default.printSecrets(secrets);
 }
@@ -107,6 +109,21 @@ function handleGet() {
         process.exit(1);
     }
 }
+function handleDelete() {
+    const keyToFind = args[3].toUpperCase();
+    if (!encryptedFileExists(keyToFind)) {
+        Output_1.default.error("Secret not found.\n");
+        process.exit(1);
+    }
+    try {
+        fs_1.default.unlinkSync(config.encryptedDataPath + '/' + keyToFind + '.enc');
+        Output_1.default.log('Secret deleted.');
+    }
+    catch (e) {
+        Output_1.default.error(e);
+        process.exit(1);
+    }
+}
 function handleDump() {
     if (!crypto.keysExists()) {
         Output_1.default.log("Keypair not found, run before:\n\tundisclosed generate-keypair");
@@ -122,10 +139,12 @@ function handleDump() {
             Output_1.default.error('Something went wrong while decrypting ' + secret.key);
         }
     });
-    if (dumpedContent.length > 0) {
-        fs_1.default.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
-        Output_1.default.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
+    if (dumpedContent.length === 0) {
+        Output_1.default.error('Nothing to dump.');
+        process.exit(1);
     }
+    fs_1.default.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
+    Output_1.default.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
 }
 function loadConfig() {
     const configuration = new Configuration_1.default(process.env.PWD + '/secrets');
