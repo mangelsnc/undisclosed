@@ -61,6 +61,7 @@ function handleInit() {
 
   if (!fs.existsSync(config.keypair.path)) {
     fs.mkdirSync(config.keypair.path);
+    fs.appendFileSync(config.keypair.path + '/.gitignore', '*.pem');
   }
 
   Output.log("Undisclosed initialized.\n");
