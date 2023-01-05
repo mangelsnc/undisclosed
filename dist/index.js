@@ -53,6 +53,7 @@ function handleInit() {
     const config = loadConfig();
     if (!fs_1.default.existsSync(config.keypair.path)) {
         fs_1.default.mkdirSync(config.keypair.path);
+        fs_1.default.appendFileSync(config.keypair.path + '/.gitignore', '*.pem');
     }
     Output_1.default.log("Undisclosed initialized.\n");
 }
