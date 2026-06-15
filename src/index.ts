@@ -66,7 +66,23 @@ function handleInit() {
     fs.appendFileSync(config.keypair.path + '/.gitignore', '*.pem');
   }
 
+  ensureGitignoreEntry(cwd + '/.gitignore', '.env');
+
   Output.log("Undisclosed initialized.\n");
+}
+
+function ensureGitignoreEntry(gitignorePath: string, entry: string) {
+  let existing = '';
+  if (fs.existsSync(gitignorePath)) {
+    existing = fs.readFileSync(gitignorePath, 'utf8');
+    const lines = existing.split('\n').map(l => l.trim());
+    if (lines.includes(entry)) {
+      return;
+    }
+  }
+
+  const prefix = existing.length > 0 && !existing.endsWith('\n') ? '\n' : '';
+  fs.appendFileSync(gitignorePath, prefix + entry + '\n');
 }
 
 function handleGenerateKeyPair() {
