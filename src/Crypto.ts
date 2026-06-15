@@ -1,7 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 
-import Configuration from './Configuration'
+import Configuration from './Configuration';
 
 export default class Crypto {
   readonly configuration: Configuration;
@@ -12,8 +12,12 @@ export default class Crypto {
     this.configuration = configuration;
 
     if (this.keysExists()) {
-      this.publicKey = fs.readFileSync(this.configuration.keypair.publicKeyPath, 'utf8').toString();
-      this.privateKey = fs.readFileSync(this.configuration.keypair.privateKeyPath, 'utf8').toString();
+      this.publicKey = fs
+        .readFileSync(this.configuration.keypair.publicKeyPath, 'utf8')
+        .toString();
+      this.privateKey = fs
+        .readFileSync(this.configuration.keypair.privateKeyPath, 'utf8')
+        .toString();
     }
   }
 
@@ -48,11 +52,11 @@ export default class Crypto {
 
   generateKeyPair() {
     const keyPair = crypto.generateKeyPairSync('rsa', {
-      modulusLength: 4096
+      modulusLength: 4096,
     });
     const options: any = {
       type: 'pkcs1',
-      format: 'pem'
+      format: 'pem',
     };
 
     const publicKey: string = keyPair.publicKey.export(options).toString();
@@ -63,10 +67,15 @@ export default class Crypto {
     }
 
     fs.writeFileSync(this.configuration.keypair.publicKeyPath, publicKey);
-    fs.writeFileSync(this.configuration.keypair.privateKeyPath, privateKey, { mode: 0o600 });
+    fs.writeFileSync(this.configuration.keypair.privateKeyPath, privateKey, {
+      mode: 0o600,
+    });
   }
 
   keysExists() {
-    return fs.existsSync(this.configuration.keypair.privateKeyPath) && fs.existsSync(this.configuration.keypair.publicKeyPath);
+    return (
+      fs.existsSync(this.configuration.keypair.privateKeyPath) &&
+      fs.existsSync(this.configuration.keypair.publicKeyPath)
+    );
   }
 }

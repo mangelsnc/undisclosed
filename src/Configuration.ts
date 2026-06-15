@@ -10,41 +10,48 @@ export default class Configuration {
 
   constructor(
     path: string,
-    privateKeyName: string = 'private',
-    publicKeyName: string = 'public',
-    defaultEnvironment: string = 'dev',
+    privateKeyName = 'private',
+    publicKeyName = 'public',
+    defaultEnvironment = 'dev',
     encryptedDataPath: string = process.cwd() + '/secrets',
-    decryptedDataPath: string = process.cwd() + '/.env'
+    decryptedDataPath: string = process.cwd() + '/.env',
   ) {
-    this.keypair = new KeyPairConfiguration(path, privateKeyName, publicKeyName)
+    this.keypair = new KeyPairConfiguration(
+      path,
+      privateKeyName,
+      publicKeyName,
+    );
     this.defaultEnvironment = defaultEnvironment;
     this.encryptedDataPath = encryptedDataPath;
     this.decryptedDataPath = decryptedDataPath;
   }
 
-  loadConfigurationFromFile(path: string = process.cwd() + '/undisclosed.conf.json') {
-
+  loadConfigurationFromFile(
+    path: string = process.cwd() + '/undisclosed.conf.json',
+  ) {
     if (!fs.existsSync(path)) {
       return;
     }
 
-    const userConfig:any = JSON.parse(fs.readFileSync(path).toString());
+    const userConfig: any = JSON.parse(fs.readFileSync(path).toString());
     const keyPairPath = process.cwd() + '/' + userConfig.keypair.path;
     this.keypair.path = keyPairPath;
-    this.keypair.privateKeyPath = this.keypair.path + '/' + userConfig.keypair.privateKeyName + '.pem';
-    this.keypair.publicKeyPath = this.keypair.path + '/' + userConfig.keypair.publicKeyName + '.pem';
+    this.keypair.privateKeyPath =
+      this.keypair.path + '/' + userConfig.keypair.privateKeyName + '.pem';
+    this.keypair.publicKeyPath =
+      this.keypair.path + '/' + userConfig.keypair.publicKeyName + '.pem';
   }
 
   toJSON() {
     return {
       keypair: {
-          path: path.basename(this.keypair.path),
-          privateKeyName: this.keypair.privateKeyName,
-          publicKeyName: this.keypair.publicKeyName,
+        path: path.basename(this.keypair.path),
+        privateKeyName: this.keypair.privateKeyName,
+        publicKeyName: this.keypair.publicKeyName,
       },
       defaultEnvironment: this.defaultEnvironment,
       encryptedDataPath: path.basename(this.encryptedDataPath),
       decryptedDataPath: path.basename(this.decryptedDataPath),
-    }
+    };
   }
 }

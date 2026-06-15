@@ -5,11 +5,7 @@ export default class KeyPairConfiguration {
   publicKeyName: string;
   publicKeyPath: string;
 
-  constructor(
-    path: string,
-    privateKeyName: string,
-    publicKeyName: string
-  ) {
+  constructor(path: string, privateKeyName: string, publicKeyName: string) {
     this.path = path;
     this.privateKeyName = privateKeyName;
     this.privateKeyPath = this.path + '/' + this.privateKeyName + '.pem';

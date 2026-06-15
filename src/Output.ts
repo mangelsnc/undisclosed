@@ -1,12 +1,12 @@
-import Key from './Key'
-import Secret from './Secret'
+import Key from './Key';
+import Secret from './Secret';
 
 export default class Output {
   private static table(data) {
     console.table(data);
   }
 
-  static printSecret(secret: Secret, truncate: boolean = true) {
+  static printSecret(secret: Secret, truncate = true) {
     if (truncate) {
       secret.value = Output.truncate(secret.value);
     }
@@ -14,16 +14,20 @@ export default class Output {
     Output.table([secret]);
   }
 
-  static printSecrets(secrets: Array<Secret>, truncate: boolean = true) {
+  static printSecrets(secrets: Array<Secret>, truncate = true) {
     if (truncate) {
-      secrets.forEach(secret => { secret.value = Output.truncate(secret.value) });
+      secrets.forEach((secret) => {
+        secret.value = Output.truncate(secret.value);
+      });
     }
 
     Output.table(secrets);
   }
 
   static printKeyPair(keyPair: Array<Key>) {
-    keyPair.forEach(key => { key.value = Output.truncate(key.value) });
+    keyPair.forEach((key) => {
+      key.value = Output.truncate(key.value);
+    });
     Output.table(keyPair);
   }
 
@@ -36,11 +40,11 @@ export default class Output {
     process.exit(1);
   }
 
-  static truncate(string: string, limit: number = 20) {
+  static truncate(string: string, limit = 20) {
     if (string.length <= limit) {
       return string;
     }
 
-    return string.slice(0, limit) + '...'
+    return string.slice(0, limit) + '...';
   }
 }
