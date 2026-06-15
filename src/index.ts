@@ -60,7 +60,7 @@ function handleInit() {
   const config = loadConfig();
 
   if (!fs.existsSync(config.keypair.path)) {
-    fs.mkdirSync(config.keypair.path);
+    fs.mkdirSync(config.keypair.path, { recursive: true });
     fs.appendFileSync(config.keypair.path + '/.gitignore', '*.pem');
   }
 

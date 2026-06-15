@@ -46,7 +46,7 @@ export default class Crypto {
     const privateKey: string = keyPair.privateKey.export(options).toString();
 
     if (!fs.existsSync(this.configuration.keypair.path)) {
-      fs.mkdirSync(this.configuration.keypair.path);
+      fs.mkdirSync(this.configuration.keypair.path, { recursive: true });
     }
 
     fs.writeFileSync(this.configuration.keypair.publicKeyPath, publicKey);
