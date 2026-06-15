@@ -96,12 +96,17 @@ function handleList() {
 }
 
 function handleSet() {
+  const key = args[3];
+  const value = args[4];
+
+  if (!key || value === undefined) {
+    Output.error('Usage: undisclosed set <KEY> <value>');
+  }
+
   if (!crypto.keysExists()) {
     Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
   }
 
-  const key = args[3];
-  const value = args[4];
   const encryptedValue = crypto.encrypt(value);
   fs.writeFileSync(config.encryptedDataPath + '/' + key.toUpperCase() + '.enc', encryptedValue);
 
@@ -109,6 +114,10 @@ function handleSet() {
 }
 
 function handleGet() {
+  if (!args[3]) {
+    Output.error('Usage: undisclosed get <KEY>');
+  }
+
   const keyToFind = args[3].toUpperCase();
 
   if (!encryptedFileExists(keyToFind)) {
@@ -129,6 +138,10 @@ function handleGet() {
 }
 
 function handleDelete() {
+  if (!args[3]) {
+    Output.error('Usage: undisclosed delete <KEY>');
+  }
+
   const keyToFind = args[3].toUpperCase();
 
   if (!encryptedFileExists(keyToFind)) {
