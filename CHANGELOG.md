@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] -  2026-06-15
+### Fixed
+- Republish the v2.3.0 contents to npm. The 2.3.0 release was tagged on GitHub but never reached npm because the release workflow ran via `workflow_dispatch`, which is incompatible with npm Trusted Publishing (npm validates the calling workflow, not the file with `npm publish`, and rejects with a 404).
+
+### Changed
+- Release workflow now triggers on `push: tags: '[0-9]+.[0-9]+.[0-9]+'` instead of push-to-main. The tag is the source of truth for the release; the workflow verifies it matches `package.json` `version` before doing anything.
+- Restore the historical git tag naming convention: tags are plain semver (`2.3.1`), not prefixed with `v`. This matches `1.0.0` through `2.2.0` and is what the new tag trigger expects.
+
+### Removed
+- `workflow_dispatch` trigger and `force_publish` input on the release workflow. The trigger was incompatible with npm Trusted Publishing; the new tag-driven flow makes it unnecessary.
+
 ## [2.3.0] -  2026-06-15
 ### Fixed
 - Require both public and private key files to be present before reporting the keypair as available.
