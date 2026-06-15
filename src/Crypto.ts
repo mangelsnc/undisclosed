@@ -54,6 +54,6 @@ export default class Crypto {
   }
 
   keysExists() {
-    return fs.existsSync(this.configuration.keypair.privateKeyPath) || fs.existsSync(this.configuration.keypair.publicKeyPath);
+    return fs.existsSync(this.configuration.keypair.privateKeyPath) && fs.existsSync(this.configuration.keypair.publicKeyPath);
   }
 }
