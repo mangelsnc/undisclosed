@@ -1,6 +1,6 @@
 enum KeyType {
   public,
-  private
+  private,
 }
 
 export default class Key {
@@ -8,7 +8,7 @@ export default class Key {
   path: string;
   value: string;
 
-  constructor (type: KeyType, path: string, value: string) {
+  constructor(type: KeyType, path: string, value: string) {
     this.type = type;
     this.path = path;
     this.value = value;

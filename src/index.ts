@@ -22,29 +22,33 @@ const commandHandler = {
   set: handleSet,
   get: handleGet,
   delete: handleDelete,
-  dump: handleDump
-}
+  dump: handleDump,
+};
 
 if (commandHandler.hasOwnProperty(subcommand)) {
   commandHandler[subcommand]();
 } else {
-  Output.log("Usage: undisclosed [init|generate-keypair|list|set|get|delete|dump]\n")
+  Output.log(
+    'Usage: undisclosed [init|generate-keypair|list|set|get|delete|dump]\n',
+  );
 }
 
 process.exit(0);
 
-function encryptedFileExists(file: string = ''): boolean {
+function encryptedFileExists(file = ''): boolean {
   return fs.existsSync(config.encryptedDataPath + '/' + file + '.enc');
 }
 
 function loadSecrets(): Array<Secret> {
   const files = fs.readdirSync(config.encryptedDataPath);
-  const encryptedFiles = files.filter(file => path.extname(file) === '.enc');
-  const secrets:Array<Secret> = [];
+  const encryptedFiles = files.filter((file) => path.extname(file) === '.enc');
+  const secrets: Array<Secret> = [];
 
-  encryptedFiles.forEach(file => {
+  encryptedFiles.forEach((file) => {
     const key = path.basename(file, '.enc');
-    const value = fs.readFileSync(config.encryptedDataPath + '/' + file).toString();
+    const value = fs
+      .readFileSync(config.encryptedDataPath + '/' + file)
+      .toString();
     secrets.push(new Secret(key, value));
   });
 
@@ -52,30 +56,57 @@ function loadSecrets(): Array<Secret> {
 }
 
 function handleInit() {
-  if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-    const defaultConfig = new Configuration(process.env.PWD + '/secrets');
-    fs.writeFileSync(process.env.PWD + '/undisclosed.conf.json', JSON.stringify(defaultConfig.toJSON(), null, 2));
+  const cwd = process.cwd();
+
+  if (!fs.existsSync(cwd + '/undisclosed.conf.json')) {
+    const defaultConfig = new Configuration(cwd + '/secrets');
+    fs.writeFileSync(
+      cwd + '/undisclosed.conf.json',
+      JSON.stringify(defaultConfig.toJSON(), null, 2),
+    );
   }
 
   const config = loadConfig();
 
   if (!fs.existsSync(config.keypair.path)) {
-    fs.mkdirSync(config.keypair.path);
+    fs.mkdirSync(config.keypair.path, { recursive: true });
     fs.appendFileSync(config.keypair.path + '/.gitignore', '*.pem');
   }
 
-  Output.log("Undisclosed initialized.\n");
+  ensureGitignoreEntry(cwd + '/.gitignore', '.env');
+
+  Output.log('Undisclosed initialized.\n');
+}
+
+function ensureGitignoreEntry(gitignorePath: string, entry: string) {
+  let existing = '';
+  if (fs.existsSync(gitignorePath)) {
+    existing = fs.readFileSync(gitignorePath, 'utf8');
+    const lines = existing.split('\n').map((l) => l.trim());
+    if (lines.includes(entry)) {
+      return;
+    }
+  }
+
+  const prefix = existing.length > 0 && !existing.endsWith('\n') ? '\n' : '';
+  fs.appendFileSync(gitignorePath, prefix + entry + '\n');
 }
 
 function handleGenerateKeyPair() {
   if (crypto.keysExists()) {
-    Output.error("Keypair already exists. Remove it before generate new keypair.\n");
+    Output.error(
+      'Keypair already exists. Remove it before generate new keypair.\n',
+    );
   }
 
   crypto.generateKeyPair();
 
-  const publicKey = fs.readFileSync(config.keypair.publicKeyPath, 'utf8').toString();
-  const privateKey = fs.readFileSync(config.keypair.privateKeyPath, 'utf8').toString();
+  const publicKey = fs
+    .readFileSync(config.keypair.publicKeyPath, 'utf8')
+    .toString();
+  const privateKey = fs
+    .readFileSync(config.keypair.privateKeyPath, 'utf8')
+    .toString();
 
   const keyPair = [
     Key.createPublicKey(config.keypair.publicKeyPath, publicKey),
@@ -96,31 +127,52 @@ function handleList() {
 }
 
 function handleSet() {
-  if (!crypto.keysExists()) {
-    Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
-  }
-
   const key = args[3];
   const value = args[4];
+
+  if (!key || value === undefined) {
+    Output.error('Usage: undisclosed set <KEY> <value>');
+  }
+
+  if (!crypto.keysExists()) {
+    Output.error(
+      'Keypair not found, run before:\n\tundisclosed generate-keypair',
+    );
+  }
+
   const encryptedValue = crypto.encrypt(value);
-  fs.writeFileSync(config.encryptedDataPath + '/' + key.toUpperCase() + '.enc', encryptedValue);
+  fs.writeFileSync(
+    config.encryptedDataPath + '/' + key.toUpperCase() + '.enc',
+    encryptedValue,
+  );
 
   Output.printSecret(new Secret(key, encryptedValue));
 }
 
 function handleGet() {
+  if (!args[3]) {
+    Output.error('Usage: undisclosed get <KEY>');
+  }
+
   const keyToFind = args[3].toUpperCase();
 
   if (!encryptedFileExists(keyToFind)) {
-    Output.error("Secret not found.\n");
+    Output.error('Secret not found.\n');
   }
 
   if (!crypto.keysExists()) {
-    Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
+    Output.error(
+      'Keypair not found, run before:\n\tundisclosed generate-keypair',
+    );
   }
 
   try {
-    const secret = new Secret(keyToFind, fs.readFileSync(config.encryptedDataPath + '/' + keyToFind + '.enc').toString());
+    const secret = new Secret(
+      keyToFind,
+      fs
+        .readFileSync(config.encryptedDataPath + '/' + keyToFind + '.enc')
+        .toString(),
+    );
     secret.value = crypto.decrypt(secret.value);
     Output.printSecret(secret);
   } catch (e) {
@@ -129,10 +181,14 @@ function handleGet() {
 }
 
 function handleDelete() {
+  if (!args[3]) {
+    Output.error('Usage: undisclosed delete <KEY>');
+  }
+
   const keyToFind = args[3].toUpperCase();
 
   if (!encryptedFileExists(keyToFind)) {
-    Output.error("Secret not found.\n");
+    Output.error('Secret not found.\n');
   }
 
   try {
@@ -145,11 +201,13 @@ function handleDelete() {
 
 function handleDump() {
   if (!crypto.keysExists()) {
-    Output.error("Keypair not found, run before:\n\tundisclosed generate-keypair");
+    Output.error(
+      'Keypair not found, run before:\n\tundisclosed generate-keypair',
+    );
   }
 
-  const dumpedContent = []
-  loadSecrets().forEach(secret => {
+  const dumpedContent = [];
+  loadSecrets().forEach((secret) => {
     try {
       secret.value = crypto.decrypt(secret.value);
       dumpedContent.push(secret.key + '=' + secret.value);
@@ -162,13 +220,14 @@ function handleDump() {
     Output.error('Nothing to dump.');
   }
 
-  fs.writeFileSync(config.decryptedDataPath, dumpedContent.join("\n"));
-  Output.log('Secrets dumped to: ' + config.decryptedDataPath + "\n");
+  fs.writeFileSync(config.decryptedDataPath, dumpedContent.join('\n'));
+  Output.log('Secrets dumped to: ' + config.decryptedDataPath + '\n');
 }
 
 function loadConfig() {
-  const configuration = new Configuration(process.env.PWD + '/secrets');
-  configuration.loadConfigurationFromFile(process.env.PWD + '/undisclosed.conf.json');
+  const cwd = process.cwd();
+  const configuration = new Configuration(cwd + '/secrets');
+  configuration.loadConfigurationFromFile(cwd + '/undisclosed.conf.json');
 
   return configuration;
 }
