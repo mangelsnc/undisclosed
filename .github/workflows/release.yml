@@ -2,14 +2,8 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      force_publish:
-        description: 'Force npm publish even if the tag already exists (does not re-tag or re-create the GitHub Release).'
-        type: boolean
-        default: false
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: write
@@ -29,47 +23,31 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: npm
 
-      - name: Read version from package.json
+      - name: Read version from tag
         id: pkg
-        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
 
-      - name: Check if tag already exists
-        id: tagcheck
+      - name: Verify tag matches package.json
         run: |
-          if git rev-parse "v${{ steps.pkg.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Decide whether to build & publish
-        id: gate
-        run: |
-          if [ "${{ steps.tagcheck.outputs.exists }}" = "false" ] || [ "${{ inputs.force_publish }}" = "true" ]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PKG_VERSION" != "${{ steps.pkg.outputs.version }}" ]; then
+            echo "Tag ${{ steps.pkg.outputs.version }} does not match package.json version $PKG_VERSION" >&2
+            exit 1
           fi
 
       - name: Install
-        if: steps.gate.outputs.run == 'true'
         run: npm ci
 
       - name: Lint
-        if: steps.gate.outputs.run == 'true'
         run: npm run lint
 
       - name: Test
-        if: steps.gate.outputs.run == 'true'
         run: npm test
 
       - name: Build
-        if: steps.gate.outputs.run == 'true'
         run: npm run build
 
       - name: Extract release notes
-        if: steps.tagcheck.outputs.exists == 'false'
-        id: notes
         run: |
           VERSION="${{ steps.pkg.outputs.version }}"
           awk -v ver="$VERSION" '
@@ -78,30 +56,16 @@ jobs:
             flag { print }
           ' CHANGELOG.md > .release-notes.md
           if [ ! -s .release-notes.md ]; then
-            echo "No changelog entry for v$VERSION" >&2
+            echo "No changelog entry for $VERSION" >&2
             exit 1
           fi
 
-      - name: Create tag
-        if: steps.tagcheck.outputs.exists == 'false'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.pkg.outputs.version }}"
-          git push origin "v${{ steps.pkg.outputs.version }}"
-
       - name: Create GitHub Release
-        if: steps.tagcheck.outputs.exists == 'false'
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
-          tag_name: v${{ steps.pkg.outputs.version }}
-          name: v${{ steps.pkg.outputs.version }}
+          tag_name: ${{ steps.pkg.outputs.version }}
+          name: ${{ steps.pkg.outputs.version }}
           body_path: .release-notes.md
 
       - name: Publish to npm
-        if: steps.gate.outputs.run == 'true'
         run: npm publish --provenance --access public
-
-      - name: Skip
-        if: steps.gate.outputs.run == 'false'
-        run: echo "Tag v${{ steps.pkg.outputs.version }} already exists and force_publish is false, nothing to do."
