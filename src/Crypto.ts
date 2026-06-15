@@ -63,7 +63,7 @@ export default class Crypto {
     }
 
     fs.writeFileSync(this.configuration.keypair.publicKeyPath, publicKey);
-    fs.writeFileSync(this.configuration.keypair.privateKeyPath, privateKey);
+    fs.writeFileSync(this.configuration.keypair.privateKeyPath, privateKey, { mode: 0o600 });
   }
 
   keysExists() {
