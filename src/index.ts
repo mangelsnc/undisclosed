@@ -52,9 +52,11 @@ function loadSecrets(): Array<Secret> {
 }
 
 function handleInit() {
-  if (!fs.existsSync(process.env.PWD + '/undisclosed.conf.json')) {
-    const defaultConfig = new Configuration(process.env.PWD + '/secrets');
-    fs.writeFileSync(process.env.PWD + '/undisclosed.conf.json', JSON.stringify(defaultConfig.toJSON(), null, 2));
+  const cwd = process.cwd();
+
+  if (!fs.existsSync(cwd + '/undisclosed.conf.json')) {
+    const defaultConfig = new Configuration(cwd + '/secrets');
+    fs.writeFileSync(cwd + '/undisclosed.conf.json', JSON.stringify(defaultConfig.toJSON(), null, 2));
   }
 
   const config = loadConfig();
@@ -180,8 +182,9 @@ function handleDump() {
 }
 
 function loadConfig() {
-  const configuration = new Configuration(process.env.PWD + '/secrets');
-  configuration.loadConfigurationFromFile(process.env.PWD + '/undisclosed.conf.json');
+  const cwd = process.cwd();
+  const configuration = new Configuration(cwd + '/secrets');
+  configuration.loadConfigurationFromFile(cwd + '/undisclosed.conf.json');
 
   return configuration;
 }

@@ -13,8 +13,8 @@ export default class Configuration {
     privateKeyName: string = 'private',
     publicKeyName: string = 'public',
     defaultEnvironment: string = 'dev',
-    encryptedDataPath: string = process.env.PWD + '/secrets',
-    decryptedDataPath: string = process.env.PWD + '/.env'
+    encryptedDataPath: string = process.cwd() + '/secrets',
+    decryptedDataPath: string = process.cwd() + '/.env'
   ) {
     this.keypair = new KeyPairConfiguration(path, privateKeyName, publicKeyName)
     this.defaultEnvironment = defaultEnvironment;
@@ -22,14 +22,14 @@ export default class Configuration {
     this.decryptedDataPath = decryptedDataPath;
   }
 
-  loadConfigurationFromFile(path: string = process.env.PWD + '/undisclosed.conf.json') {
+  loadConfigurationFromFile(path: string = process.cwd() + '/undisclosed.conf.json') {
 
     if (!fs.existsSync(path)) {
       return;
     }
 
     const userConfig:any = JSON.parse(fs.readFileSync(path).toString());
-    const keyPairPath = process.env.PWD + '/' + userConfig.keypair.path;
+    const keyPairPath = process.cwd() + '/' + userConfig.keypair.path;
     this.keypair.path = keyPairPath;
     this.keypair.privateKeyPath = this.keypair.path + '/' + userConfig.keypair.privateKeyName + '.pem';
     this.keypair.publicKeyPath = this.keypair.path + '/' + userConfig.keypair.publicKeyName + '.pem';
