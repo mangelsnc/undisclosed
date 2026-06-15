@@ -16,10 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `init` now adds `.env` to the project root `.gitignore` so dumped secrets cannot be committed by accident.
 - GitHub Actions workflow `ci.yml` runs lint, build, and tests on every pull request.
-- GitHub Actions workflow `release.yml` auto-tags, releases, and publishes to npm whenever `main` advances and `package.json` `version` does not yet have a matching git tag.
+- GitHub Actions workflow `release.yml` auto-tags, releases, and publishes to npm whenever `main` advances and `package.json` `version` does not yet have a matching git tag. The release job uses Node 20 and npm Trusted Publishing (OIDC) with provenance; it supports a `force_publish` manual dispatch input to republish a version without re-tagging.
 
 ### Removed
 - `npm-publish.yml` workflow (replaced by `release.yml`).
+- `NPM_TOKEN` secret is no longer needed; the workflow authenticates to npm via OIDC.
 
 ## [2.2.0] -  2023-01-05
 ### Added
