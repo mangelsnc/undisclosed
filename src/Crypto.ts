@@ -1,6 +1,5 @@
 import fs from 'fs';
 import crypto from 'crypto';
-import { JwkKeyExportOptions } from 'crypto';
 
 import Configuration from './Configuration'
 
@@ -20,7 +19,14 @@ export default class Crypto {
 
   encrypt(toEncrypt): string {
     const buffer = Buffer.from(toEncrypt, 'utf8');
-    const encrypted = crypto.publicEncrypt(this.publicKey, buffer);
+    const encrypted = crypto.publicEncrypt(
+      {
+        key: this.publicKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+        oaepHash: 'sha1',
+      },
+      buffer,
+    );
 
     return encrypted.toString('base64');
   }
@@ -28,7 +34,14 @@ export default class Crypto {
   decrypt(toDecrypt): string {
     const buffer = Buffer.from(toDecrypt, 'base64');
 
-    const decrypted = crypto.privateDecrypt(this.privateKey, buffer);
+    const decrypted = crypto.privateDecrypt(
+      {
+        key: this.privateKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+        oaepHash: 'sha1',
+      },
+      buffer,
+    );
 
     return decrypted.toString('utf8');
   }
