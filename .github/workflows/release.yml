@@ -4,9 +4,16 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      force_publish:
+        description: 'Force npm publish even if the tag already exists (does not re-tag or re-create the GitHub Release).'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   release:
@@ -18,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           registry-url: https://registry.npmjs.org/
           cache: npm
 
@@ -35,20 +42,29 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Decide whether to build & publish
+        id: gate
+        run: |
+          if [ "${{ steps.tagcheck.outputs.exists }}" = "false" ] || [ "${{ inputs.force_publish }}" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install
-        if: steps.tagcheck.outputs.exists == 'false'
+        if: steps.gate.outputs.run == 'true'
         run: npm ci
 
       - name: Lint
-        if: steps.tagcheck.outputs.exists == 'false'
+        if: steps.gate.outputs.run == 'true'
         run: npm run lint
 
       - name: Test
-        if: steps.tagcheck.outputs.exists == 'false'
+        if: steps.gate.outputs.run == 'true'
         run: npm test
 
       - name: Build
-        if: steps.tagcheck.outputs.exists == 'false'
+        if: steps.gate.outputs.run == 'true'
         run: npm run build
 
       - name: Extract release notes
@@ -83,11 +99,9 @@ jobs:
           body_path: .release-notes.md
 
       - name: Publish to npm
-        if: steps.tagcheck.outputs.exists == 'false'
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+        if: steps.gate.outputs.run == 'true'
+        run: npm publish --provenance --access public
 
       - name: Skip
-        if: steps.tagcheck.outputs.exists == 'true'
-        run: echo "Tag v${{ steps.pkg.outputs.version }} already exists, nothing to release."
+        if: steps.gate.outputs.run == 'false'
+        run: echo "Tag v${{ steps.pkg.outputs.version }} already exists and force_publish is false, nothing to do."
